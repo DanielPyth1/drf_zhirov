@@ -6,11 +6,13 @@ from django.shortcuts import get_object_or_404
 from .models import Course, Lesson, Subscription
 from .serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
 from users.permissions import IsModerator, IsOwner
+from .paginators import CourseLessonPagination
 
 class LessonListCreateView(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CourseLessonPagination
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -24,6 +26,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = CourseLessonPagination
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy']:
