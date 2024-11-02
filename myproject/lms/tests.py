@@ -1,3 +1,4 @@
+import os
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework import status
@@ -6,6 +7,7 @@ from django.contrib.auth import get_user_model
 from .models import Course, Lesson, Subscription
 from rest_framework.test import APIClient
 from django.core.files import File
+from django.conf import settings
 
 User = get_user_model()
 
@@ -53,7 +55,9 @@ class LessonCourseTests(APITestCase):
     def test_update_lesson(self):
         url = reverse('lesson-detail', args=[self.lesson.id])
 
-        with open("C:\\Users\\mario\\OneDrive\\Рабочий стол\\РП\\cloud2566.png", "rb") as img:
+        file_path = os.path.join(settings.BASE_DIR, 'РП', 'cloud2566.png')
+
+        with open(file_path, "rb") as img:
             data = {
                 "title": "Updated Lesson",
                 "description": "Updated Description",
