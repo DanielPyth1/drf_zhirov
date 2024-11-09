@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'users',
     'lms',
     'django_filters',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +126,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+STRIPE_API_KEY = "sk_test_51QJAAoLpc5xYsUQwgTeieDhBjIUzQdbekUGbZKLO43EMRqHULZzOUljtk3kpaadTXuBDpiwyuRVqai3bRY7tARmD00lww7MO5X"

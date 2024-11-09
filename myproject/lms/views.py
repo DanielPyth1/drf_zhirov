@@ -7,6 +7,9 @@ from .models import Course, Lesson, Subscription
 from .serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
 from users.permissions import IsModerator, IsOwner
 from .paginators import CourseLessonPagination
+from .models import Payment
+from .services import create_product, create_price, create_checkout_session
+from django.http import HttpResponse
 
 class LessonListCreateView(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
@@ -66,3 +69,33 @@ class SubscriptionView(APIView):
             return Response({"message": "Подписка удалена"}, status=status.HTTP_200_OK)
 
         return Response({"message": "Подписка добавлена"}, status=status.HTTP_201_CREATED)
+
+
+class CreatePaymentView(APIView):
+    def post(self, request):
+        course_id = request.data.get("course_id")
+        course = Course.objects.get(id=course_id)
+
+        product = create_product(course.title)
+        price = create_price(product.id, int(course.price * 100))  # в копейках
+        session = create_checkout_session(
+            price.id,
+            "http://127.0.0.1:8000/success/",
+            "http://127.0.0.1:8000/cancel/",
+        )
+
+        payment = Payment.objects.create(
+            course=course,
+            price_id=price.id,
+            session_id=session.id,
+            checkout_url=session.url,
+        )
+
+        return Response({"checkout_url": payment.checkout_url})
+
+
+def payment_success(request):
+    return HttpResponse("Оплата прошла успешно!")
+
+def payment_cancel(request):
+    return HttpResponse("Оплата была отменена.")

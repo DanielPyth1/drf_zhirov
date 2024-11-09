@@ -8,6 +8,7 @@ class Course(models.Model):
     title = models.CharField(max_length=200)
     preview = models.ImageField(upload_to='course_previews/')
     description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     owner = models.ForeignKey(User, on_delete=models.CASCADE,
                               related_name='courses')
 
@@ -37,3 +38,14 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.user} подписан на {self.course}'
+
+
+class Payment(models.Model):
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='lms_payments',  # Уникальное related_name
+    )
+    price_id = models.CharField(max_length=255)
+    session_id = models.CharField(max_length=255)
+    checkout_url = models.URLField()
