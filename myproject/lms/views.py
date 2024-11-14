@@ -10,6 +10,7 @@ from .paginators import CourseLessonPagination
 from .models import Payment
 from .services import create_product, create_price, create_checkout_session
 from django.http import HttpResponse
+from .tasks import send_course_update_email
 
 class LessonListCreateView(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
@@ -45,6 +46,19 @@ class CourseViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        course = serializer.instance
+        subscribers = course.subscription_set.all()
+        emails = [sub.user.email for sub in subscribers]
+
+        # Асинхронный вызов
+        send_course_update_email.delay(
+            subject=f"Обновление курса: {course.title}",
+            message=f"Курс '{course.title}' был обновлен.",
+            recipient_list=emails,
+        )
 
 class LessonViewSet(viewsets.ModelViewSet):
     queryset = Lesson.objects.all()
